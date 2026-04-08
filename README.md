@@ -5,12 +5,14 @@ A NestJS-based REST API server implementing a complete Role-Based Access Control
 ## Features
 
 ### Authentication & Authorization
+
 - **JWT-based authentication** with access and refresh tokens
 - **Role-based access control** with hierarchical permissions
 - **Permission-based guards** for endpoint protection
 - **Token refresh** mechanism with httpOnly cookies
 
 ### Core Modules
+
 - **Users** - User management with role assignment, status management, manager hierarchy
 - **Roles** - Role CRUD with permission assignments (ADMIN, MANAGER, AGENT, CUSTOMER)
 - **Permissions** - Permission management with granular access control
@@ -21,6 +23,7 @@ A NestJS-based REST API server implementing a complete Role-Based Access Control
 - **Dashboard** - Dashboard with aggregated metrics
 
 ### Security
+
 - **Rate limiting** with ThrottlerModule (10 requests/minute)
 - **Password hashing** with bcrypt
 - **SQL injection protection** via Sequelize ORM
@@ -52,28 +55,31 @@ src/
 ## Permissions System
 
 ### Permission Categories
-| Category | Permissions |
-|----------|-------------|
-| Dashboard | `dashboard.view` |
-| Users | `users.view`, `users.create`, `users.edit`, `users.delete` |
-| Roles | `roles.view`, `roles.manage` |
-| Permissions | `permissions.view`, `permissions.manage` |
-| Leads | `leads.view`, `leads.manage` |
-| Tasks | `tasks.view`, `tasks.manage` |
-| Reports | `reports.view` |
-| Audit Logs | `audit_logs.view` |
+
+| Category    | Permissions                                                |
+| ----------- | ---------------------------------------------------------- |
+| Dashboard   | `dashboard.view`                                           |
+| Users       | `users.view`, `users.create`, `users.edit`, `users.delete` |
+| Roles       | `roles.view`, `roles.manage`                               |
+| Permissions | `permissions.view`, `permissions.manage`                   |
+| Leads       | `leads.view`, `leads.manage`                               |
+| Tasks       | `tasks.view`, `tasks.manage`                               |
+| Reports     | `reports.view`                                             |
+| Audit Logs  | `audit_logs.view`                                          |
 
 ### Role Permission Matrix
-| Role | Permissions |
-|------|-------------|
-| ADMIN | All permissions |
-| MANAGER | All except `permissions.manage` and delete operations |
-| AGENT | `dashboard.view`, `leads.view`, `tasks.view`, `tasks.manage` |
-| CUSTOMER | `dashboard.view` only |
+
+| Role     | Permissions                                                  |
+| -------- | ------------------------------------------------------------ |
+| ADMIN    | All permissions                                              |
+| MANAGER  | All except `permissions.manage` and delete operations        |
+| AGENT    | `dashboard.view`, `leads.view`, `tasks.view`, `tasks.manage` |
+| CUSTOMER | `dashboard.view` only                                        |
 
 ## API Endpoints
 
 ### Authentication
+
 - `GET /auth/status` - Check if system is bootstrapped
 - `POST /auth/register` - Register new user
 - `POST /auth/login` - Login (returns access token)
@@ -82,6 +88,7 @@ src/
 - `POST /auth/me` - Get current user info
 
 ### Users
+
 - `GET /users` - List all users
 - `GET /users/:id` - Get user by ID
 - `POST /users` - Create user
@@ -92,6 +99,7 @@ src/
 - `DELETE /users/:id/permissions/:permissionId` - Revoke permission
 
 ### Roles
+
 - `GET /roles` - List all roles
 - `GET /roles/:id` - Get role by ID
 - `POST /roles` - Create role
@@ -101,6 +109,7 @@ src/
 - `DELETE /roles/:id/permissions/:permissionId` - Remove permission
 
 ### Permissions
+
 - `GET /permissions` - List all permissions
 - `GET /permissions/:id` - Get permission by ID
 - `POST /permissions` - Create permission
@@ -108,6 +117,7 @@ src/
 - `DELETE /permissions/:id` - Delete permission
 
 ### Other Modules
+
 - Leads: `GET/POST/PATCH/DELETE /leads`
 - Tasks: `GET/POST/PATCH/DELETE /tasks`
 - Reports: `GET /reports/*`
@@ -117,11 +127,14 @@ src/
 ## Usage
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database
 
 ### Environment Variables
+
 ```env
+PORT=5000
 DB_CONNECTION_STRING=postgresql://user:password@host:port/database
 JWT_SECRET=your-jwt-secret
 JWT_EXPIRES_IN=15m
@@ -131,12 +144,13 @@ NODE_ENV=development
 ```
 
 ### Installation
+
 ```bash
-cd server
 yarn install
 ```
 
 ### Running the Application
+
 ```bash
 # Development
 yarn run start
@@ -146,19 +160,25 @@ yarn run start:dev
 
 # Production
 yarn run start:prod
+
+# Database Seed
+yarn run db:seed
 ```
 
 ### Database Seeding
+
 ```bash
 yarn run seed
 ```
 
 This creates:
+
 - 14 permissions
 - 4 roles (ADMIN, MANAGER, AGENT, CUSTOMER)
 - Default admin user: `admin@example.com` / `admin123456`
 
 ### Running Tests
+
 ```bash
 # Unit tests
 yarn run test
