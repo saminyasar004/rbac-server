@@ -1,98 +1,208 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# RBAC System - Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based REST API server implementing a complete Role-Based Access Control (RBAC) system with JWT authentication, permissions management, and audit logging.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+### Authentication & Authorization
+- **JWT-based authentication** with access and refresh tokens
+- **Role-based access control** with hierarchical permissions
+- **Permission-based guards** for endpoint protection
+- **Token refresh** mechanism with httpOnly cookies
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Core Modules
+- **Users** - User management with role assignment, status management, manager hierarchy
+- **Roles** - Role CRUD with permission assignments (ADMIN, MANAGER, AGENT, CUSTOMER)
+- **Permissions** - Permission management with granular access control
+- **Audit Logs** - Automatic logging of all API requests with response interceptor
+- **Leads** - Lead management with assignment and status tracking
+- **Tasks** - Task management with CRUD operations
+- **Reports** - Reporting module for data analysis
+- **Dashboard** - Dashboard with aggregated metrics
 
-## Project setup
+### Security
+- **Rate limiting** with ThrottlerModule (10 requests/minute)
+- **Password hashing** with bcrypt
+- **SQL injection protection** via Sequelize ORM
+- **SSL support** for production environments
+- **Grant Ceiling** - Users can only grant permissions they possess
 
-```bash
-$ yarn install
+## Project Structure
+
+```
+src/
+├── app.module.ts              # Main application module
+├── main.ts                    # Application entry point
+├── seed.ts                    # Database seeding script
+├── common/
+│   ├── decorators/            # Custom decorators (Permissions)
+│   └── guards/                # Custom guards (PermissionsGuard)
+└── modules/
+    ├── auth/                  # Authentication (login, register, refresh)
+    ├── users/                 # User management
+    ├── roles/                 # Role management
+    ├── permissions/           # Permission management
+    ├── leads/                 # Lead management
+    ├── tasks/                 # Task management
+    ├── reports/               # Reporting
+    ├── dashboard/             # Dashboard metrics
+    └── audit-logs/             # Audit logging
 ```
 
-## Compile and run the project
+## Permissions System
 
-```bash
-# development
-$ yarn run start
+### Permission Categories
+| Category | Permissions |
+|----------|-------------|
+| Dashboard | `dashboard.view` |
+| Users | `users.view`, `users.create`, `users.edit`, `users.delete` |
+| Roles | `roles.view`, `roles.manage` |
+| Permissions | `permissions.view`, `permissions.manage` |
+| Leads | `leads.view`, `leads.manage` |
+| Tasks | `tasks.view`, `tasks.manage` |
+| Reports | `reports.view` |
+| Audit Logs | `audit_logs.view` |
 
-# watch mode
-$ yarn run start:dev
+### Role Permission Matrix
+| Role | Permissions |
+|------|-------------|
+| ADMIN | All permissions |
+| MANAGER | All except `permissions.manage` and delete operations |
+| AGENT | `dashboard.view`, `leads.view`, `tasks.view`, `tasks.manage` |
+| CUSTOMER | `dashboard.view` only |
 
-# production mode
-$ yarn run start:prod
+## API Endpoints
+
+### Authentication
+- `GET /auth/status` - Check if system is bootstrapped
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - Login (returns access token)
+- `POST /auth/refresh` - Refresh access token
+- `POST /auth/logout` - Logout (invalidate refresh token)
+- `POST /auth/me` - Get current user info
+
+### Users
+- `GET /users` - List all users
+- `GET /users/:id` - Get user by ID
+- `POST /users` - Create user
+- `PATCH /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
+- `PATCH /users/:id/status` - Update user status
+- `POST /users/:id/permissions` - Grant permission to user
+- `DELETE /users/:id/permissions/:permissionId` - Revoke permission
+
+### Roles
+- `GET /roles` - List all roles
+- `GET /roles/:id` - Get role by ID
+- `POST /roles` - Create role
+- `PATCH /roles/:id` - Update role
+- `DELETE /roles/:id` - Delete role
+- `POST /roles/:id/permissions` - Assign permission to role
+- `DELETE /roles/:id/permissions/:permissionId` - Remove permission
+
+### Permissions
+- `GET /permissions` - List all permissions
+- `GET /permissions/:id` - Get permission by ID
+- `POST /permissions` - Create permission
+- `PATCH /permissions/:id` - Update permission
+- `DELETE /permissions/:id` - Delete permission
+
+### Other Modules
+- Leads: `GET/POST/PATCH/DELETE /leads`
+- Tasks: `GET/POST/PATCH/DELETE /tasks`
+- Reports: `GET /reports/*`
+- Dashboard: `GET /dashboard/*`
+- Audit Logs: `GET /audit-logs`
+
+## Usage
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+
+### Environment Variables
+```env
+DB_CONNECTION_STRING=postgresql://user:password@host:port/database
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_SECRET=your-refresh-secret
+REFRESH_TOKEN_EXPIRES_IN=7d
+NODE_ENV=development
 ```
 
-## Run tests
-
+### Installation
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+cd server
+yarn install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### Running the Application
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Development
+yarn run start
+
+# Watch mode (hot reload)
+yarn run start:dev
+
+# Production
+yarn run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Database Seeding
+```bash
+yarn run seed
+```
 
-## Resources
+This creates:
+- 14 permissions
+- 4 roles (ADMIN, MANAGER, AGENT, CUSTOMER)
+- Default admin user: `admin@example.com` / `admin123456`
 
-Check out a few resources that may come in handy when working with NestJS:
+### Running Tests
+```bash
+# Unit tests
+yarn run test
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# E2E tests
+yarn run test:e2e
 
-## Support
+# Test coverage
+yarn run test:cov
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Using the Permission Guard
 
-## Stay in touch
+Apply the `@Permissions()` decorator to protected routes:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```typescript
+import { Permissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 
-## License
+@Controller('users')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+export class UsersController {
+  @Get()
+  @Permissions('users.view')
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+  @Post()
+  @Permissions('users.create')
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+}
+```
+
+## API Documentation
+
+Swagger documentation is available at `/api` when the application is running.
+
+## Architecture Highlights
+
+1. **Hierarchical User Structure** - Support for Manager → Agent → Customer hierarchy
+2. **Grant Ceiling** - Users can only grant permissions they possess
+3. **Extra Permissions** - Users can have additional permissions beyond their role
+4. **Audit Interceptor** - Automatic logging of all API requests
+5. **Token Refresh** - HttpOnly cookie-based refresh token mechanism
