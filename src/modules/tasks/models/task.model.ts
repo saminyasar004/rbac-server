@@ -2,7 +2,7 @@ import { Column, DataType, Model, Table, ForeignKey, BelongsTo } from 'sequelize
 import { User } from '../../users/models/user.model';
 
 export enum TaskStatus {
-  TODO = 'TODO',
+  PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
@@ -21,31 +21,31 @@ export class Task extends Model {
   declare id: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  title: string;
+  declare title: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  description: string;
+  declare description: string;
 
-  @Column({ type: DataType.ENUM(...Object.values(TaskStatus)), defaultValue: TaskStatus.TODO })
-  status: TaskStatus;
+  @Column({ type: DataType.ENUM(...Object.values(TaskStatus)), defaultValue: TaskStatus.PENDING })
+  declare status: TaskStatus;
 
   @Column({ type: DataType.ENUM(...Object.values(TaskPriority)), defaultValue: TaskPriority.MEDIUM })
-  priority: TaskPriority;
+  declare priority: TaskPriority;
 
   @Column({ type: DataType.DATE, allowNull: true })
-  dueDate: Date;
+  declare dueDate: Date;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: true })
-  assignedTo: string;
+  declare assignedTo: string;
 
   @BelongsTo(() => User, 'assignedTo')
-  assignedUser: User;
+  declare assignedUser: User;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
-  createdBy: string;
+  declare createdBy: string;
 
   @BelongsTo(() => User, 'createdBy')
-  creator: User;
+  declare creator: User;
 }
