@@ -9,18 +9,33 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Middlewares
-  app.use(morgan('dev'));
-  app.use(helmet());
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  
+  // CORS must be enabled before security middleware like helmet
   app.enableCors({
-    origin: [
-      frontendUrl,
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        frontendUrl,
+        frontendUrl.replace(/\/$/, ''), // matching without trailing slash
+        'https://rbac-apps.netlify.app',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+      ];
+      
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
+
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
 
   // Global Pipes
   app.useGlobalPipes(new ValidationPipe({
