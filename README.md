@@ -167,15 +167,21 @@ yarn run db:seed
 
 ### Database Seeding
 
+To bootstrap the database with initial roles, permissions, and an admin user:
+
 ```bash
 yarn run seed
 ```
 
-This creates:
+### Seed Account Credentials
 
-- 14 permissions
-- 4 roles (ADMIN, MANAGER, AGENT, CUSTOMER)
-- Default admin user: `admin@example.com` / `admin123456`
+Once seeded, you can log in with the following default admin account:
+
+| Field    | Value               |
+| -------- | ------------------- |
+| Email    | `admin@example.com` |
+| Password | `admin123456`       |
+| Role     | `ADMIN`             |
 
 ### Running Tests
 
