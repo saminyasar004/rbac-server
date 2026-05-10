@@ -1,18 +1,41 @@
-import { Controller, Get, Post, Body, UnauthorizedException, UseGuards, Request, Res, HttpCode } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UnauthorizedException,
+  UseGuards,
+  Request,
+  Res,
+  HttpCode,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+  ApiExtraModels,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
+@ApiExtraModels(AuthResponseDto, UserResponseDto)
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Get('status')
-  @ApiOperation({ summary: 'Check if the system is bootstrapped (has any users)' })
+  @ApiOperation({
+    summary: 'Check if the system is bootstrapped (has any users)',
+  })
   @ApiResponse({ status: 200, description: 'Bootstrap status' })
   async getStatus() {
     return this.authService.getBootstrapStatus();
@@ -20,6 +43,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
+  @ApiOkResponse({ type: AuthResponseDto })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'User already exists' })
   async register(@Body() registerDto: RegisterDto) {
@@ -29,19 +53,22 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Login and get tokens' })
-  @ApiResponse({ status: 200, description: 'Returns access token and user data. Refresh token is set in httpOnly cookie' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiOkResponse({ type: AuthResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   async login(
     @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
   ) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     const result = await this.authService.login(user);
-    
+
     // Set refresh token in httpOnly cookie
     response.cookie('refresh_token', result.refresh_token, {
       httpOnly: true,
@@ -75,15 +102,12 @@ export class AuthController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Logout and invalidate refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(
-    @Request() req,
-    @Res({ passthrough: true }) response: Response
-  ) {
+  async logout(@Request() req, @Res({ passthrough: true }) response: Response) {
     await this.authService.logout(req.user.userId);
-    
+
     // Clear refresh token cookie
     response.clearCookie('refresh_token');
-    
+
     return { message: 'Logged out successfully' };
   }
 
@@ -91,8 +115,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user info' })
-  @ApiResponse({ status: 200, description: 'Returns current user data' })
+  @ApiOkResponse({ type: UserResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async getMe(@Request() req) {
-    return req.user;
+    return this.authService.getCurrentUser(req.user.userId);
   }
 }

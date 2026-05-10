@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Optionally verify user still exists and is active
     const user = await this.usersService.findById(payload.sub);
-    
+
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -30,12 +30,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException(`Account is ${user.status}`);
     }
 
-    return { 
-      userId: payload.sub, 
-      email: payload.email,
-      roleId: payload.roleId, 
-      role: payload.role, 
-      permissions: payload.permissions 
+    const rolePermissions =
+      user.role?.permissions?.map((p: any) => p.name) || [];
+    const extraPermissions =
+      user.extraPermissions?.map((p: any) => p.name) || [];
+    const permissions = rolePermissions
+      .concat(extraPermissions)
+      .filter((permission, index, list) => list.indexOf(permission) === index);
+
+    return {
+      userId: payload.sub,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      roleId: user.roleId,
+      role: user.role?.name,
+      permissions,
     };
   }
 }

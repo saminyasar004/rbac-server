@@ -1,39 +1,49 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsUUID, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  IsOptional,
+  IsUUID,
+  IsString,
+} from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'John', description: 'First name of the user' })
   @IsNotEmpty()
   @IsString()
-  firstName: string;
+  declare firstName: string;
 
   @ApiProperty({ example: 'Doe', description: 'Last name of the user' })
   @IsNotEmpty()
   @IsString()
-  lastName: string;
+  declare lastName: string;
 
   @ApiProperty({ example: 'admin@example.com', description: 'Email address' })
   @IsEmail()
-  email: string;
+  declare email: string;
 
-  @ApiProperty({ example: 'password123', description: 'Password (min 6 characters)' })
+  @ApiProperty({
+    example: 'password123',
+    description: 'Password (min 6 characters)',
+  })
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  declare password: string;
 
-  @ApiProperty({ 
-    example: '7d7d7d7d-7d7d-7d7d-7d7d-7d7d7d7d7d7d', 
+  @ApiProperty({
+    example: '7d7d7d7d-7d7d-7d7d-7d7d-7d7d7d7d7d7d',
     description: 'Role ID (optional, defaults to customer role)',
-    required: false 
+    required: false,
   })
   @IsOptional()
   @IsUUID()
   roleId?: string;
 
-  @ApiProperty({ 
-    example: '7d7d7d7d-7d7d-7d7d-7d7d-7d7d7d7d7d7d', 
+  @ApiProperty({
+    example: '7d7d7d7d-7d7d-7d7d-7d7d-7d7d7d7d7d7d',
     description: 'Manager ID (for agent/customer hierarchy)',
-    required: false 
+    required: false,
   })
   @IsOptional()
   @IsUUID()
