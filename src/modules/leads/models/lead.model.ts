@@ -1,4 +1,11 @@
-import { Column, DataType, Model, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  Model,
+  Table,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { User } from '../../users/models/user.model';
 
 export enum LeadStatus {
@@ -11,38 +18,45 @@ export enum LeadStatus {
 
 @Table({ tableName: 'leads', timestamps: true })
 export class Lead extends Model {
-  @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4, primaryKey: true })
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+    primaryKey: true,
+  })
   declare id: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  name: string;
+  declare name: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
-  email: string;
+  declare email: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  phone: string;
+  declare phone: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  company: string;
+  declare company: string;
 
-  @Column({ type: DataType.ENUM(...Object.values(LeadStatus)), defaultValue: LeadStatus.NEW })
-  status: LeadStatus;
+  @Column({
+    type: DataType.ENUM(...Object.values(LeadStatus)),
+    defaultValue: LeadStatus.NEW,
+  })
+  declare status: LeadStatus;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  notes: string;
+  declare notes: string;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: true })
-  assignedTo: string;
+  declare assignedTo: string;
 
   @BelongsTo(() => User, 'assignedTo')
-  assignedUser: User;
+  declare assignedUser: User;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
-  createdBy: string;
+  declare createdBy: string;
 
   @BelongsTo(() => User, 'createdBy')
-  creator: User;
+  declare creator: User;
 }
